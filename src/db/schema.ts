@@ -13,7 +13,8 @@ export const CREATE_RECORDS_TABLE = `
     address     TEXT NOT NULL DEFAULT '',
     note        TEXT NOT NULL DEFAULT '',
     photo_path  TEXT NOT NULL DEFAULT '',
-    audio_path  TEXT NOT NULL DEFAULT ''
+    audio_path  TEXT NOT NULL DEFAULT '',
+    video_path  TEXT NOT NULL DEFAULT ''
   );
 `;
 
@@ -25,4 +26,9 @@ export const CREATE_CREATED_AT_INDEX = `
 /** v1 → v2: 新增录音路径列(幂等)。 */
 export const MIGRATE_V2_AUDIO_PATH = `
   ALTER TABLE records ADD COLUMN audio_path TEXT NOT NULL DEFAULT '';
+`;
+
+/** v2 → v3: 新增视频路径列(幂等)。 */
+export const MIGRATE_V3_VIDEO_PATH = `
+  ALTER TABLE records ADD COLUMN video_path TEXT NOT NULL DEFAULT '';
 `;

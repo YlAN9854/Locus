@@ -24,6 +24,8 @@ export interface LocusRecord {
   photoPath: string;
   /** 录音相对路径,如 audio/{uuid}.m4a。若该条记录为打字输入则为空字符串 */
   audioPath: string;
+  /** 短视频相对路径,如 videos/{uuid}.mp4。若该条记录为拍照/纯语音则为空字符串 */
+  videoPath: string;
 }
 
 /** 新建记录时的输入(id 与 createdAt 由仓库层生成) */

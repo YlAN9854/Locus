@@ -34,6 +34,7 @@ interface ExportItem {
   note: string;
   photo: string;
   audio: string;
+  video: string;
 }
 
 function toExportItem(r: LocusRecord): ExportItem {
@@ -50,6 +51,7 @@ function toExportItem(r: LocusRecord): ExportItem {
     note: r.note,
     photo: r.photoPath,
     audio: r.audioPath,
+    video: r.videoPath,
   };
 }
 
@@ -73,6 +75,7 @@ function buildHtml(items: ExportItem[]): string {
           <div class="time">${escapeHtml(date)}</div>
           <div class="place">${escapeHtml(it.location.name || it.location.address)}</div>
           <p class="note">${escapeHtml(it.note)}</p>
+          ${it.video ? `<video controls src="${escapeHtml(it.video)}" style="width:100%;margin-top:8px;max-height:320px"></video>` : ''}
           ${it.audio ? `<audio controls src="${escapeHtml(it.audio)}" style="width:100%;margin-top:8px"></audio>` : ''}
           <a class="coord" href="${map}" target="_blank">
             ${it.location.wgs84.lat.toFixed(6)}, ${it.location.wgs84.lng.toFixed(6)} (WGS84)
@@ -146,6 +149,12 @@ export async function exportAll(): Promise<string> {
       const f = new File(Paths.document, r.audioPath);
       if (f.exists) {
         files[`locus_export/${r.audioPath}`] = await f.bytes();
+      }
+    }
+    if (r.videoPath) {
+      const f = new File(Paths.document, r.videoPath);
+      if (f.exists) {
+        files[`locus_export/${r.videoPath}`] = await f.bytes();
       }
     }
   }

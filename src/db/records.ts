@@ -21,6 +21,7 @@ type Row = {
   note: string;
   photo_path: string;
   audio_path: string;
+  video_path: string;
 };
 
 function rowToRecord(r: Row): LocusRecord {
@@ -34,6 +35,7 @@ function rowToRecord(r: Row): LocusRecord {
     note: r.note,
     photoPath: r.photo_path,
     audioPath: r.audio_path,
+    videoPath: r.video_path,
   };
 }
 
@@ -45,8 +47,8 @@ export async function insertRecord(input: NewLocusRecord): Promise<LocusRecord> 
     ...input,
   };
   await getDb().runAsync(
-    `INSERT INTO records (id, created_at, lat, lng, poi_name, address, note, photo_path, audio_path)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO records (id, created_at, lat, lng, poi_name, address, note, photo_path, audio_path, video_path)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       record.id,
       record.createdAt,
@@ -57,6 +59,7 @@ export async function insertRecord(input: NewLocusRecord): Promise<LocusRecord> 
       record.note,
       record.photoPath,
       record.audioPath,
+      record.videoPath,
     ],
   );
   return record;
