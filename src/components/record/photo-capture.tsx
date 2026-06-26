@@ -86,7 +86,10 @@ export default function PhotoCapture({onSaved}: Props) {
   if (!isDraftReady) {
     return (
       <View style={styles.shutterWrap}>
-        <Pressable style={styles.shutter} onPress={capture} disabled={shutterBusy}>
+        <Pressable
+          style={({pressed}) => [styles.shutter, pressed && !shutterBusy && {opacity: 0.7}]}
+          onPress={capture}
+          disabled={shutterBusy}>
           {shutterBusy ? (
             <ActivityIndicator color={Colors.onPrimary} />
           ) : (
@@ -114,14 +117,22 @@ export default function PhotoCapture({onSaved}: Props) {
 
       <View style={styles.modeRow}>
         <Pressable
-          style={[styles.modeBtn, inputMode === 'text' && styles.modeBtnActive]}
+          style={({pressed}) => [
+            styles.modeBtn,
+            inputMode === 'text' && styles.modeBtnActive,
+            pressed && {opacity: 0.7},
+          ]}
           onPress={() => setInputMode('text')}>
           <Text style={[styles.modeBtnText, inputMode === 'text' && styles.modeBtnTextActive]}>
             文字
           </Text>
         </Pressable>
         <Pressable
-          style={[styles.modeBtn, inputMode === 'audio' && styles.modeBtnActive]}
+          style={({pressed}) => [
+            styles.modeBtn,
+            inputMode === 'audio' && styles.modeBtnActive,
+            pressed && {opacity: 0.7},
+          ]}
           onPress={() => setInputMode('audio')}>
           <Text style={[styles.modeBtnText, inputMode === 'audio' && styles.modeBtnTextActive]}>
             录音
@@ -145,7 +156,9 @@ export default function PhotoCapture({onSaved}: Props) {
               <Text style={styles.transResult} numberOfLines={4}>
                 {transText || '转录未返回结果'}
               </Text>
-              <Pressable style={styles.reRecordBtn} onPress={reRecord}>
+              <Pressable
+                style={({pressed}) => [styles.reRecordBtn, pressed && {opacity: 0.7}]}
+                onPress={reRecord}>
                 <Text style={styles.reRecordText}>重录</Text>
               </Pressable>
             </View>
@@ -176,10 +189,24 @@ export default function PhotoCapture({onSaved}: Props) {
       )}
 
       <View style={styles.actions}>
-        <Pressable style={[styles.btn, styles.btnGhost]} onPress={reset} disabled={shutterBusy}>
+        <Pressable
+          style={({pressed}) => [
+            styles.btn,
+            styles.btnGhost,
+            pressed && !shutterBusy && {opacity: 0.7},
+          ]}
+          onPress={reset}
+          disabled={shutterBusy}>
           <Text style={styles.btnGhostText}>重拍</Text>
         </Pressable>
-        <Pressable style={[styles.btn, styles.btnPrimary]} onPress={save} disabled={shutterBusy || !canSave}>
+        <Pressable
+          style={({pressed}) => [
+            styles.btn,
+            styles.btnPrimary,
+            pressed && canSave && !shutterBusy && {opacity: 0.7},
+          ]}
+          onPress={save}
+          disabled={shutterBusy || !canSave}>
           {saving ? (
             <ActivityIndicator color={Colors.onPrimary} />
           ) : (
@@ -215,16 +242,17 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.track,
     borderRadius: 8,
     padding: 3,
+    gap: 3,
   },
   modeBtn: {
     flex: 1,
-    height: 34,
+    height: 44,
     borderRadius: 6,
     alignItems: 'center',
     justifyContent: 'center',
   },
   modeBtnActive: {backgroundColor: Colors.surface},
-  modeBtnText: {fontSize: 14, color: Colors.textHint},
+  modeBtnText: {fontSize: 14, color: Colors.textSecondary},
   modeBtnTextActive: {color: Colors.textPrimary, fontWeight: '600'},
   input: {
     minHeight: 90,
@@ -277,9 +305,12 @@ const styles = StyleSheet.create({
   },
   reRecordBtn: {
     paddingHorizontal: 24,
-    paddingVertical: 8,
+    paddingVertical: 10,
+    minHeight: 44,
     borderRadius: 16,
     backgroundColor: Colors.track,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   reRecordText: {color: Colors.textSecondary, fontSize: 14},
   actions: {flexDirection: 'row', paddingHorizontal: 16, paddingBottom: 16, gap: 12},

@@ -129,29 +129,39 @@ export default function VoiceCapture({onSaved}: Props) {
               <Text style={styles.transLoadingText}>正在将录音转为文字…</Text>
             </View>
           ) : (
-            <Pressable
-              style={[styles.recordBtn, phase === 'recording' && styles.recordBtnActive]}
-              onPressIn={() => {
-                startRecording();
-                if (!locationRef.current) {
-                  startLocation();
-                }
-              }}
-              onPressOut={phase === 'recording' ? stopRecording : undefined}>
-              {phase === 'recording' ? (
-                <View style={styles.recordingWrap}>
-                  <View style={styles.recordingDot} />
-                  <Text style={styles.recordingHint}>松手停止</Text>
-                </View>
-              ) : (
-                <Text style={styles.recordBtnText}>按住录音</Text>
+            <>
+              {phase === 'idle' && (
+                <Text style={styles.guidance}>按住按钮开始说话，松开自动记录</Text>
               )}
-            </Pressable>
+              <Pressable
+                style={[
+                  styles.recordBtn,
+                  phase === 'recording' && styles.recordBtnActive,
+                ]}
+                onPressIn={() => {
+                  startRecording();
+                  if (!locationRef.current) {
+                    startLocation();
+                  }
+                }}
+                onPressOut={phase === 'recording' ? stopRecording : undefined}>
+                {phase === 'recording' ? (
+                  <View style={styles.recordingWrap}>
+                    <View style={styles.recordingDot} />
+                    <Text style={styles.recordingHint}>松手停止</Text>
+                  </View>
+                ) : (
+                  <Text style={styles.recordBtnText}>按住录音</Text>
+                )}
+              </Pressable>
+            </>
           )}
         </View>
       ) : (
         <View style={styles.preview}>
-          <Pressable style={styles.playBtn} onPress={togglePlayback}>
+          <Pressable
+            style={({pressed}) => [styles.playBtn, pressed && {opacity: 0.7}]}
+            onPress={togglePlayback}>
             <Text style={styles.playBtnText}>
               {playing ? '⏸ 暂停' : '▶ 回放'}
             </Text>
@@ -178,10 +188,24 @@ export default function VoiceCapture({onSaved}: Props) {
           </View>
 
           <View style={styles.actions}>
-            <Pressable style={[styles.btn, styles.btnGhost]} onPress={reRecord} disabled={saving}>
+            <Pressable
+              style={({pressed}) => [
+                styles.btn,
+                styles.btnGhost,
+                pressed && !saving && {opacity: 0.7},
+              ]}
+              onPress={reRecord}
+              disabled={saving}>
               <Text style={styles.btnGhostText}>重录</Text>
             </Pressable>
-            <Pressable style={[styles.btn, styles.btnPrimary]} onPress={save} disabled={saving}>
+            <Pressable
+              style={({pressed}) => [
+                styles.btn,
+                styles.btnPrimary,
+                pressed && !saving && {opacity: 0.7},
+              ]}
+              onPress={save}
+              disabled={saving}>
               {saving ? (
                 <ActivityIndicator color={Colors.onPrimary} />
               ) : (
@@ -198,6 +222,12 @@ export default function VoiceCapture({onSaved}: Props) {
 const styles = StyleSheet.create({
   container: {flex: 1},
   recordStage: {flex: 1, alignItems: 'center', justifyContent: 'center', paddingBottom: 40},
+  guidance: {
+    fontSize: 13,
+    color: Colors.textHint,
+    marginBottom: 24,
+    textAlign: 'center',
+  },
   recordBtn: {
     width: 160,
     height: 160,
@@ -231,9 +261,12 @@ const styles = StyleSheet.create({
   playBtn: {
     alignSelf: 'center',
     paddingHorizontal: 24,
-    paddingVertical: 10,
+    paddingVertical: 12,
+    minHeight: 44,
     borderRadius: 20,
     backgroundColor: Colors.track,
+    alignItems: 'center',
+    justifyContent: 'center',
     marginBottom: 12,
   },
   playBtnText: {fontSize: 15, color: Colors.textSecondary},

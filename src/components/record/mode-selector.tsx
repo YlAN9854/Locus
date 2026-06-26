@@ -21,7 +21,11 @@ export default function ModeSelector({mode, onChange}: Props) {
       {MODES.map(m => (
         <Pressable
           key={m.key}
-          style={[styles.btn, mode === m.key && styles.btnActive]}
+          style={({pressed}) => [
+            styles.btn,
+            mode === m.key && styles.btnActive,
+            pressed && {opacity: 0.7},
+          ]}
           onPress={() => onChange(m.key)}>
           <Text style={[styles.text, mode === m.key && styles.textActive]}>
             {m.label}
@@ -38,18 +42,19 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.track,
     borderRadius: 10,
     padding: 4,
+    gap: 4,
     marginHorizontal: 16,
     marginTop: 12,
     marginBottom: 8,
   },
   btn: {
     flex: 1,
-    height: 36,
+    height: 44,
     borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
   },
   btnActive: {backgroundColor: Colors.surface},
-  text: {fontSize: 14, color: Colors.textHint},
+  text: {fontSize: 14, color: Colors.textSecondary},
   textActive: {color: Colors.textPrimary, fontWeight: '600'},
 });

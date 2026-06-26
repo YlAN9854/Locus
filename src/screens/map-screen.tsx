@@ -131,7 +131,10 @@ export default function MapScreen() {
         ))}
       </MapView>
 
-      <Pressable style={styles.exportBtn} onPress={onExport} disabled={exporting}>
+      <Pressable
+        style={({pressed}) => [styles.exportBtn, pressed && !exporting && {opacity: 0.7}]}
+        onPress={onExport}
+        disabled={exporting}>
         {exporting ? (
           <ActivityIndicator size="small" color={Colors.onPrimary} />
         ) : (
@@ -162,7 +165,12 @@ export default function MapScreen() {
                       nativeControls={false}
                       contentFit="cover"
                     />
-                    <Pressable style={styles.videoPlayBtn} onPress={() => toggleVideoPlayback(selected)}>
+                    <Pressable
+                      style={({pressed}) => [
+                        styles.videoPlayBtn,
+                        pressed && {backgroundColor: 'rgba(0,0,0,0.5)'},
+                      ]}
+                      onPress={() => toggleVideoPlayback(selected)}>
                       <Text style={styles.videoPlayText}>
                         {videoPlaybackId === selected.id && videoPlaying ? '⏸ 暂停' : '▶ 播放'}
                       </Text>
@@ -180,7 +188,7 @@ export default function MapScreen() {
 
                   {!!selected.audioPath && (
                     <Pressable
-                      style={styles.playBtn}
+                      style={({pressed}) => [styles.playBtn, pressed && {opacity: 0.7}]}
                       onPress={() => togglePlayback(selected)}>
                       <Text style={styles.playIcon}>
                         {playbackId === selected.id && playerStatus.playing ? '⏸' : '▶'}
@@ -191,7 +199,9 @@ export default function MapScreen() {
                     </Pressable>
                   )}
                 </View>
-                <Pressable style={styles.closeBtn} onPress={closeDetail}>
+                <Pressable
+                  style={({pressed}) => [styles.closeBtn, pressed && {opacity: 0.7}]}
+                  onPress={closeDetail}>
                   <Text style={styles.closeText}>关闭</Text>
                 </Pressable>
               </>
@@ -210,8 +220,8 @@ const styles = StyleSheet.create({
     top: 16,
     right: 16,
     paddingHorizontal: 18,
-    height: 40,
-    borderRadius: 20,
+    height: 44,
+    borderRadius: 22,
     backgroundColor: Colors.accent,
     alignItems: 'center',
     justifyContent: 'center',
@@ -244,14 +254,22 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginTop: 14,
-    paddingVertical: 10,
+    paddingVertical: 12,
     paddingHorizontal: 16,
+    minHeight: 44,
     borderRadius: 20,
     backgroundColor: Colors.track,
     alignSelf: 'flex-start',
   },
   playIcon: {fontSize: 14, marginRight: 6},
   playLabel: {fontSize: 14, color: Colors.textNote},
-  closeBtn: {alignItems: 'center', paddingVertical: 14, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: Colors.placeholder},
+  closeBtn: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 14,
+    minHeight: 44,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: Colors.placeholder,
+  },
   closeText: {color: Colors.textSecondary, fontSize: 16},
 });
