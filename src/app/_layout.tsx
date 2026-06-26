@@ -20,6 +20,7 @@ import AppTabs from '@/components/app-tabs';
 import {initDatabase} from '@/db/database';
 import {ensureAmapPrivacy} from '@/services/location';
 import {getErrorMessage} from '@/utils/error';
+import {Colors} from '@/constants/colors';
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -65,7 +66,7 @@ export default function RootLayout() {
 
 const styles = StyleSheet.create({
   center: {flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24},
-  loading: {marginTop: 12, color: '#666'},
-  errText: {fontSize: 16, fontWeight: '600', color: '#c00'},
-  errDetail: {marginTop: 8, color: '#666', textAlign: 'center'},
+  loading: {marginTop: 12, color: Colors.textSecondary},
+  errText: {fontSize: 16, fontWeight: '600', color: Colors.error},
+  errDetail: {marginTop: 8, color: Colors.textSecondary, textAlign: 'center'},
 });

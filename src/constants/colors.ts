@@ -32,4 +32,14 @@ export const Colors = {
   // 录音
   recordRed: '#e53935',
   recordRedDark: '#c62828',
+
+  // 状态
+  error: '#c00',
+
+  // 遮罩
+  backdrop: 'rgba(0,0,0,0.4)',
+  videoOverlay: 'rgba(0,0,0,0.3)',
+
+  // 链接
+  link: '#3c87f7',
 } as const;

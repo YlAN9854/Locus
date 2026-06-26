@@ -247,7 +247,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(0,0,0,0.3)',
+    backgroundColor: Colors.videoOverlay,
   },
   videoPlayText: {color: Colors.onPrimary, fontSize: 16, fontWeight: '600'},
   placeRow: {paddingHorizontal: 16, paddingTop: 14},
