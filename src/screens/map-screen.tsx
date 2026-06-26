@@ -21,10 +21,12 @@ import {
 import {useFocusEffect} from 'expo-router';
 import {MapView, Marker} from 'expo-gaode-map';
 import {useAudioPlayer, useAudioPlayerStatus} from 'expo-audio';
+import {useVideoPlayer, VideoView} from 'expo-video';
 
 import {getAllRecords} from '@/db/records';
 import {absolutePath} from '@/services/photo';
 import {absoluteAudioPath} from '@/services/audio';
+import {absoluteVideoPath} from '@/services/video';
 import {exportAll} from '@/services/export';
 import {Colors} from '@/constants/colors';
 import {getErrorMessage} from '@/utils/error';
@@ -39,6 +41,11 @@ export default function MapScreen() {
   const player = useAudioPlayer(null);
   const playerStatus = useAudioPlayerStatus(player);
   const [playbackId, setPlaybackId] = useState<string | null>(null);
+
+  // 视频回放
+  const videoPlayer = useVideoPlayer(null);
+  const [videoPlaying, setVideoPlaying] = useState(false);
+  const [videoPlaybackId, setVideoPlaybackId] = useState<string | null>(null);
 
   const load = async () => {
     const all = await getAllRecords();
@@ -84,7 +91,28 @@ export default function MapScreen() {
       player.pause();
     }
     setPlaybackId(null);
+    if (videoPlaying) {
+      videoPlayer.pause();
+      setVideoPlaying(false);
+    }
+    setVideoPlaybackId(null);
     setSelected(null);
+  };
+
+  const toggleVideoPlayback = (record: LocusRecord) => {
+    if (videoPlaybackId === record.id && videoPlaying) {
+      videoPlayer.pause();
+      setVideoPlaying(false);
+      return;
+    }
+
+    const uri = absoluteVideoPath(record.videoPath);
+    videoPlayer.replace(uri);
+    setVideoPlaybackId(record.id);
+    setTimeout(() => {
+      videoPlayer.play();
+      setVideoPlaying(true);
+    }, 200);
   };
 
   const initialCamera = records.length
@@ -125,6 +153,21 @@ export default function MapScreen() {
               <>
                 {!!selected.photoPath && (
                   <Image source={{uri: absolutePath(selected.photoPath)}} style={styles.detailPhoto} />
+                )}
+                {!!selected.videoPath && (
+                  <View style={styles.videoContainer}>
+                    <VideoView
+                      player={videoPlayer}
+                      style={styles.detailPhoto}
+                      nativeControls={false}
+                      contentFit="cover"
+                    />
+                    <Pressable style={styles.videoPlayBtn} onPress={() => toggleVideoPlayback(selected)}>
+                      <Text style={styles.videoPlayText}>
+                        {videoPlaybackId === selected.id && videoPlaying ? '⏸ 暂停' : '▶ 播放'}
+                      </Text>
+                    </Pressable>
+                  </View>
                 )}
                 <View style={styles.detailMeta}>
                   <Text style={styles.detailTime}>
@@ -181,6 +224,18 @@ const styles = StyleSheet.create({
   backdrop: {flex: 1, backgroundColor: 'rgba(0,0,0,.4)', justifyContent: 'flex-end'},
   detail: {backgroundColor: Colors.surface, borderTopLeftRadius: 18, borderTopRightRadius: 18, overflow: 'hidden'},
   detailPhoto: {width: '100%', height: 300, backgroundColor: Colors.placeholder},
+  videoContainer: {position: 'relative', height: 300, overflow: 'hidden'},
+  videoPlayBtn: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(0,0,0,0.3)',
+  },
+  videoPlayText: {color: Colors.onPrimary, fontSize: 16, fontWeight: '600'},
   detailMeta: {padding: 16},
   detailTime: {fontSize: 12, color: Colors.textMuted},
   detailPlace: {fontSize: 17, fontWeight: '700', marginTop: 4, color: Colors.textPrimary},

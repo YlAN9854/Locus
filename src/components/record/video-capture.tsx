@@ -8,7 +8,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import { VideoView } from 'expo-video';
+import {useVideoPlayer, VideoView} from 'expo-video';
 
 import {useVideoCapture} from '@/hooks/use-video-capture';
 import {useAudioRecording} from '@/hooks/use-audio-recording';
@@ -31,10 +31,25 @@ export default function VideoCapture({onSaved}: Props) {
 
   const {draftRef, videoUri, poiLine, locating, busy, capture, resetCapture} = useVideoCapture();
   const {startRecording, stopRecording, phase, transText, pendingAudioPath, reRecord, resetAudio} = useAudioRecording();
+  const player = useVideoPlayer(videoUri ?? '');
+  const [playing, setPlaying] = useState(false);
 
   const isDraftReady = !!videoUri;
   const shutterBusy = busy || locating || saving;
   const canSave = inputMode === 'text' ? note.trim().length > 0 || !!draftRef.current?.videoPath : phase === 'done';
+
+  const togglePlayback = () => {
+    if (playing) {
+      player.pause();
+      setPlaying(false);
+    } else {
+      player.replace(videoUri!);
+      setTimeout(() => {
+        player.play();
+        setPlaying(true);
+      }, 200);
+    }
+  };
 
   const reset = () => {
     clearTimeout(feedbackTimerRef.current);
@@ -43,6 +58,7 @@ export default function VideoCapture({onSaved}: Props) {
     setNote('');
     setInputMode('text');
     setSavedFeedback(false);
+    setPlaying(false);
   };
 
   const save = async () => {
@@ -100,8 +116,18 @@ export default function VideoCapture({onSaved}: Props) {
 
   return (
     <View style={styles.card}>
-      <View style={styles.videoPlaceholder}>
-        <VideoView videoUri={videoUri} />
+      <View style={styles.videoContainer}>
+        <VideoView
+          player={player}
+          style={styles.videoPlaceholder}
+          nativeControls={false}
+          contentFit="cover"
+        />
+        <Pressable style={styles.videoPlayBtn} onPress={togglePlayback}>
+          <Text style={styles.videoPlayText}>
+            {playing ? '⏸ 暂停' : '▶ 回放'}
+          </Text>
+        </Pressable>
       </View>
 
       <View style={styles.placeRow}>
@@ -207,14 +233,23 @@ const styles = StyleSheet.create({
   shutterText: {color: Colors.onPrimary, fontSize: 18, letterSpacing: 2},
   hint: {marginTop: 12, fontSize: 13, color: Colors.textHint},
   card: {backgroundColor: Colors.surface, borderRadius: 16, overflow: 'hidden'},
+  videoContainer: {position: 'relative'},
   videoPlaceholder: {
     width: '100%',
     height: 320,
     backgroundColor: Colors.placeholder,
+  },
+  videoPlayBtn: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: 'rgba(0,0,0,0.3)',
   },
-  videoPlaceholderText: {fontSize: 16, color: Colors.textHint},
+  videoPlayText: {color: Colors.onPrimary, fontSize: 16, fontWeight: '600'},
   placeRow: {paddingHorizontal: 16, paddingTop: 14},
   placeLocating: {flexDirection: 'row', alignItems: 'center'},
   placeHint: {marginLeft: 8, color: Colors.textHint},
