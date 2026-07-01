@@ -22,6 +22,7 @@ type Row = {
   photo_path: string;
   audio_path: string;
   video_path: string;
+  embedding: string | null;
 };
 
 function rowToRecord(r: Row): LocusRecord {
@@ -47,8 +48,8 @@ export async function insertRecord(input: NewLocusRecord): Promise<LocusRecord> 
     ...input,
   };
   await getDb().runAsync(
-    `INSERT INTO records (id, created_at, lat, lng, poi_name, address, note, photo_path, audio_path, video_path)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO records (id, created_at, lat, lng, poi_name, address, note, photo_path, audio_path, video_path, embedding)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       record.id,
       record.createdAt,
@@ -60,6 +61,7 @@ export async function insertRecord(input: NewLocusRecord): Promise<LocusRecord> 
       record.photoPath,
       record.audioPath,
       record.videoPath,
+      null,                  // embedding — 异步生成后回填
     ],
   );
   return record;
@@ -98,4 +100,91 @@ export async function countRecords(): Promise<number> {
     'SELECT COUNT(*) AS n FROM records',
   );
   return row?.n ?? 0;
+}
+
+// ---------------------------------------------------------------------------
+// 结构化查询（混合 RAG 的 Stage 1: SQL 精确过滤）
+// ---------------------------------------------------------------------------
+
+export interface QueryFilter {
+  dateRange?: {start?: number; end?: number};
+  locationKeywords?: string[];
+}
+
+/**
+ * 按时间和地点关键词过滤记录。
+ * 所有条件为 AND（交集）。空 filter 等价于 getAllRecords()。
+ */
+export async function queryRecords(filter: QueryFilter): Promise<LocusRecord[]> {
+  const conditions: string[] = [];
+  const params: (string | number)[] = [];
+
+  if (filter.dateRange?.start != null) {
+    conditions.push('created_at >= ?');
+    params.push(filter.dateRange.start);
+  }
+  if (filter.dateRange?.end != null) {
+    conditions.push('created_at <= ?');
+    params.push(filter.dateRange.end);
+  }
+  if (filter.locationKeywords && filter.locationKeywords.length > 0) {
+    const orClauses = filter.locationKeywords.map(() =>
+      '(poi_name LIKE ? OR address LIKE ?)',
+    );
+    conditions.push(`(${orClauses.join(' OR ')})`);
+    for (const kw of filter.locationKeywords) {
+      const pattern = `%${kw}%`;
+      params.push(pattern, pattern);
+    }
+  }
+
+  const where = conditions.length > 0
+    ? `WHERE ${conditions.join(' AND ')}`
+    : '';
+  const rows = await getDb().getAllAsync<Row>(
+    `SELECT * FROM records ${where} ORDER BY created_at DESC`,
+    params,
+  );
+  return rows.map(rowToRecord);
+}
+
+// ---------------------------------------------------------------------------
+// 向量嵌入（混合 RAG 的 Stage 2: 语义匹配）
+// ---------------------------------------------------------------------------
+
+/** 回填某条记录的 embedding（JSON 字符串）。 */
+export async function updateEmbedding(id: string, vector: number[]): Promise<void> {
+  await getDb().runAsync(
+    'UPDATE records SET embedding = ? WHERE id = ?',
+    [JSON.stringify(vector), id],
+  );
+}
+
+/** 获取指定记录的 embedding 数据,用于余弦相似度计算。无嵌入的记录 embedding 为 null。 */
+export async function getEmbeddingsForRecords(
+  ids: string[],
+): Promise<{id: string; embedding: string | null}[]> {
+  if (ids.length === 0) return [];
+
+  // SQLite 绑定参数上限约 999，分批处理
+  const BATCH = 500;
+  if (ids.length <= BATCH) {
+    const placeholders = ids.map(() => '?').join(',');
+    return await getDb().getAllAsync<{id: string; embedding: string | null}>(
+      `SELECT id, embedding FROM records WHERE id IN (${placeholders})`,
+      ids,
+    );
+  }
+
+  const results: {id: string; embedding: string | null}[] = [];
+  for (let i = 0; i < ids.length; i += BATCH) {
+    const batch = ids.slice(i, i + BATCH);
+    const placeholders = batch.map(() => '?').join(',');
+    const rows = await getDb().getAllAsync<{id: string; embedding: string | null}>(
+      `SELECT id, embedding FROM records WHERE id IN (${placeholders})`,
+      batch,
+    );
+    results.push(...rows);
+  }
+  return results;
 }

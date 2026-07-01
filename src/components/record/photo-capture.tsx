@@ -13,6 +13,7 @@ import {
 import {usePhotoCapture} from '@/hooks/use-photo-capture';
 import {useAudioRecording} from '@/hooks/use-audio-recording';
 import {insertRecord} from '@/db/records';
+import {generateAndStoreEmbedding} from '@/services/embedding';
 import {Colors} from '@/constants/colors';
 import {getErrorMessage} from '@/utils/error';
 
@@ -61,7 +62,9 @@ export default function PhotoCapture({onSaved}: Props) {
 
     setSaving(true);
     try {
-      await insertRecord({...draft, note: finalNote, audioPath: finalAudioPath});
+      const saved = await insertRecord({...draft, note: finalNote, audioPath: finalAudioPath});
+      // fire-and-forget: 异步生成向量嵌入,不阻塞保存流程
+      generateAndStoreEmbedding(saved.id, saved.poiName, saved.note);
       setSavedFeedback(true);
       clearTimeout(feedbackTimerRef.current);
       feedbackTimerRef.current = setTimeout(() => {

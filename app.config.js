@@ -87,6 +87,8 @@ module.exports = {
       router: {},
       SILICONFLOW_API_KEY: process.env.SILICONFLOW_API_KEY ?? '',
       SILICONFLOW_MODEL: process.env.SILICONFLOW_MODEL ?? 'TeleAI/TeleSpeechASR',
+      SILICONFLOW_CHAT_MODEL: process.env.SILICONFLOW_CHAT_MODEL ?? 'deepseek-ai/DeepSeek-V4-Flash',
+      SILICONFLOW_EMBEDDING_MODEL: process.env.SILICONFLOW_EMBEDDING_MODEL ?? 'BAAI/bge-large-zh-v1.5',
       eas: {
         projectId: 'fdba50ea-28bd-4c44-bcee-739694dc760f',
       },

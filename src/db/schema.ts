@@ -32,3 +32,8 @@ export const MIGRATE_V2_AUDIO_PATH = `
 export const MIGRATE_V3_VIDEO_PATH = `
   ALTER TABLE records ADD COLUMN video_path TEXT NOT NULL DEFAULT '';
 `;
+
+/** v3 → v4: 新增向量嵌入列(幂等)。存储 JSON 数组,如 "[0.12, -0.34, ...]" (1024-dim)。NULL 表示未嵌入。 */
+export const MIGRATE_V4_EMBEDDING = `
+  ALTER TABLE records ADD COLUMN embedding TEXT;
+`;

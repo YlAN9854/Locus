@@ -14,6 +14,7 @@ import {useAudioPlayer, useAudioPlayerStatus} from 'expo-audio';
 import {ensureLocationPermission, getCurrentPlace} from '@/services/location';
 import {absoluteAudioPath} from '@/services/audio';
 import {insertRecord} from '@/db/records';
+import {generateAndStoreEmbedding} from '@/services/embedding';
 import {Colors} from '@/constants/colors';
 import {getErrorMessage} from '@/utils/error';
 
@@ -86,7 +87,7 @@ export default function VoiceCapture({onSaved}: Props) {
 
     setSaving(true);
     try {
-      await insertRecord({
+      const saved = await insertRecord({
         lat: loc?.lat ?? 0,
         lng: loc?.lng ?? 0,
         poiName: loc?.poiName ?? '',
@@ -96,6 +97,7 @@ export default function VoiceCapture({onSaved}: Props) {
         audioPath,
         videoPath: '',
       });
+      generateAndStoreEmbedding(saved.id, saved.poiName, saved.note);
       setSavedFeedback(true);
       clearTimeout(feedbackTimerRef.current);
       feedbackTimerRef.current = setTimeout(() => {
