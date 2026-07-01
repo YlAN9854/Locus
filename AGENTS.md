@@ -50,6 +50,26 @@ src/
 - **Layer boundaries (one-way dependencies)** — `app → screens → components / services / db / hooks → models / utils / constants`. Lower layers never import upper ones. Concretely: `services/` and `db/` must not import from `components/` or `screens/` (no UI in service code), and screens reach data **only** through the `db/` DAO functions — never write SQL or `fetch` directly in a screen.
 - **React Compiler** (`reactCompiler: true`) and **typedRoutes** are both enabled in `app.config.js`.
 
+## NL query pipeline testing
+
+The `scripts/` directory contains a device-independent test suite for the natural language query pipeline (LLM decomposition → SQL filtering → embedding search).
+
+```bash
+# Step 1: generate ~1000 Shanghai records + embeddings (requires SILICONFLOW_API_KEY, ~3-5 min)
+npx tsx scripts/seed.ts
+
+# Step 2: run tests (no API needed except LLM/embedding layers, seconds)
+npx tsx scripts/test.ts
+```
+
+**Design:** generation and testing are separate — `seed.ts` produces a reusable `scripts/test-output/locus-test.db` (gitignored). `test.ts` loads that DB and runs four test layers: SQL filtering, semantic search, LLM decomposition, end-to-end pipeline. The DB file can also be copied to a device's `documentDir/` to verify map rendering.
+
+**Dependency note:** `better-sqlite3` must be **v12.x** (not v11) — v11 fails to compile on Node 24+ due to V8 API breakage (`v8::Global` constructor signature change). If you see `Could not locate the bindings file`, upgrade: `npm install better-sqlite3@12 --save-dev`.
+
+**Env vars used:** `SILICONFLOW_API_KEY`, `SILICONFLOW_EMBEDDING_MODEL`, `DEEPSEEK_API_KEY`, `DEEPSEEK_CHAT_MODEL`. Scripts load `.env` from the project root via a custom parser (no dotenv dependency).
+
+**Constraints:** these scripts do NOT modify any `src/` code. They import from `src/utils/vector-search.ts` directly (pure JS math). DB operations use `better-sqlite3` (sync API) instead of `expo-sqlite` (async), but SQL statements are identical.
+
 ## Initialization order (critical)
 
 In `src/app/_layout.tsx`, the root layout runs two async steps **before rendering any UI**:
