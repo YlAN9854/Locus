@@ -1,4 +1,4 @@
-# Expo HAS CHANGED
+# Project rules
 
 Read the exact versioned docs at https://docs.expo.dev/versions/v56.0.0/ before writing any code.
 
@@ -10,7 +10,8 @@ Read the exact versioned docs at https://docs.expo.dev/versions/v56.0.0/ before 
 - **`.npmrc`** sets `node-linker=hoisted` to avoid Windows path-too-long errors in native module builds.
 - **`.env` file is required** for map functionality. Copy `.env.example` → `.env` and fill `AMAP_ANDROID_KEY` / `AMAP_IOS_KEY`. These are consumed by the `expo-gaode-map` config plugin at build time. `.env` is gitignored.
 - **Managed workflow** — `/ios` and `/android` are gitignored. Do not edit native project files; use config plugins in `app.config.js`.
-- **Dependency installation** is done by the user manually. Do not run `pnpm install` — the user handles it.
+
+> **Dependency installation is done by the user manually. Do not run `pnpm install`.**
 
 ## Commands
 
@@ -28,6 +29,12 @@ Read the exact versioned docs at https://docs.expo.dev/versions/v56.0.0/ before 
 1. `npx tsc --noEmit` — type check (requires `typescript` in devDeps, or use `npx -y -p typescript tsc --noEmit`)
 2. `pnpm lint` — ESLint
 3. `pnpm expo run:android` / `pnpm expo run:ios` — runtime smoke test
+
+## Out of scope
+
+- **No web support.** Do not add `react-native-web`, `react-dom`, or web-only files (`.web.ts`, `.web.tsx`, `.module.css`, `global.css`). Exception: `external-link.tsx` works on native via `expo-web-browser`.
+- **Do not modify native project files** — `/ios` and `/android` are gitignored.
+- **No new update operations** — the only write path beyond insert/query/delete is `updateNote(id, text)` for AI transcription back-fill.
 
 ## Architecture
 
@@ -50,26 +57,6 @@ src/
 - **Layer boundaries (one-way dependencies)** — `app → screens → components / services / db / hooks → models / utils / constants`. Lower layers never import upper ones. Concretely: `services/` and `db/` must not import from `components/` or `screens/` (no UI in service code), and screens reach data **only** through the `db/` DAO functions — never write SQL or `fetch` directly in a screen.
 - **React Compiler** (`reactCompiler: true`) and **typedRoutes** are both enabled in `app.config.js`.
 
-## NL query pipeline testing
-
-The `scripts/` directory contains a device-independent test suite for the natural language query pipeline (LLM decomposition → SQL filtering → embedding search).
-
-```bash
-# Step 1: generate ~1000 Shanghai records + embeddings (requires SILICONFLOW_API_KEY, ~3-5 min)
-npx tsx scripts/seed.ts
-
-# Step 2: run tests (no API needed except LLM/embedding layers, seconds)
-npx tsx scripts/test.ts
-```
-
-**Design:** generation and testing are separate — `seed.ts` produces a reusable `scripts/test-output/locus-test.db` (gitignored). `test.ts` loads that DB and runs four test layers: SQL filtering, semantic search, LLM decomposition, end-to-end pipeline. The DB file can also be copied to a device's `documentDir/` to verify map rendering.
-
-**Dependency note:** `better-sqlite3` must be **v12.x** (not v11) — v11 fails to compile on Node 24+ due to V8 API breakage (`v8::Global` constructor signature change). If you see `Could not locate the bindings file`, upgrade: `npm install better-sqlite3@12 --save-dev`.
-
-**Env vars used:** `SILICONFLOW_API_KEY`, `SILICONFLOW_EMBEDDING_MODEL`, `DEEPSEEK_API_KEY`, `DEEPSEEK_CHAT_MODEL`. Scripts load `.env` from the project root via a custom parser (no dotenv dependency).
-
-**Constraints:** these scripts do NOT modify any `src/` code. They import from `src/utils/vector-search.ts` directly (pure JS math). DB operations use `better-sqlite3` (sync API) instead of `expo-sqlite` (async), but SQL statements are identical.
-
 ## Initialization order (critical)
 
 In `src/app/_layout.tsx`, the root layout runs two async steps **before rendering any UI**:
@@ -82,28 +69,24 @@ While initializing, the app shows a spinner. On error, it shows an error screen.
 ## Data model
 
 - **All coordinates are GCJ-02** (Gaode/Mars). Export to WGS84 only in `utils/coords.ts` when producing output files.
-- **MVP: insert, query, delete, with one exception** — `updateNote(id, text)` exists for AI transcription back-fill. No other update operations.
+- **MVP write paths:** insert, query, delete. One exception — `updateNote(id, text)` for AI transcription back-fill. No other update operations.
 - Photos stored as flat files under `documentDir/photos/` with relative paths in the DB, not as blobs.
 - Audio recordings stored under `documentDir/audio/` (same pattern as photos). `expo-audio` handles recording/playback.
 - **AI transcription** via SiliconFlow API (`services/transcription.ts`). Requires `SILICONFLOW_API_KEY` and `SILICONFLOW_VOICE_MODEL` in `.env`. These are injected into `app.config.js` `extra`, read at runtime via `expo-constants` — NOT `process.env`. Default model: `TeleAI/TeleSpeechASR`.
 
-## Platform targets
-
-- **Android and iOS only.** No web support. Do not add `react-native-web`, `react-dom`, or web-only files (`.web.ts`, `.web.tsx`, `.module.css`, `global.css`).
-- `external-link.tsx` is an exception — it works on native via `expo-web-browser` and is safe to keep.
-
 ## UI patterns
 
 - Primary styling: `StyleSheet.create()` with hardcoded hex colors.
+- All color/spacing/font tokens are defined in `src/constants/`. Do not hardcode new design values — add a token first.
 - `Colors` / `ThemedText` / `ThemedView` exist for light/dark theming but screens do NOT currently use them.
 - `global.css` and `Fonts.web` are for **web-only** styling. CSS custom properties are web-specific font stacks.
 
 ## Design direction
 
 - **Style:** Minimalism & Swiss Style — clean, functional, lots of white space. The app is a quiet personal tool, not a flashy social product.
-- **Color:** Warm near-black primary (`#1C1917`) on off-white background (`#FAFAFA`). Blue accent (`#2563EB`) reserved for special actions (export, sync). Recording red (`#E53935`). All tokens in `src/constants/colors.ts`.
+- **Color:** Warm near-black primary on off-white background. Blue accent reserved for special actions (export, sync). Recording red. All tokens in `src/constants/colors.ts`.
 - **Fonts:** System fonts only (iOS PingFang SC / Android Noto Sans CJK). No custom font loading.
-- **Interaction:** Subtle micro-interactions — button press scale 0.97, color shift, no over-the-top animations.
+- **Interaction:** Subtle micro-interactions — button press scale, color shift, no over-the-top animations. Follow existing patterns in `components/`.
 
 ## Gotchas
 
@@ -143,3 +126,23 @@ If a `Pressable` with `onPressIn`/`onPressOut` is conditionally replaced by a pl
 ### useCallback closures — use useRef for mutable data
 
 When `useCallback` captures state that changes during an async operation (e.g. `draft` data in `stopRecording`), use `useRef` to store the mutable value instead. State inside `useCallback` dependencies creates stale closures and complex dependency chains.
+
+## NL query pipeline testing
+
+The `scripts/` directory contains a device-independent test suite for the natural language query pipeline (LLM decomposition → SQL filtering → embedding search).
+
+```bash
+# Step 1: generate ~1000 Shanghai records + embeddings (requires SILICONFLOW_API_KEY, ~3-5 min)
+npx tsx scripts/seed.ts
+
+# Step 2: run tests (no API needed except LLM/embedding layers, seconds)
+npx tsx scripts/test.ts
+```
+
+**Design:** generation and testing are separate — `seed.ts` produces a reusable `scripts/test-output/locus-test.db` (gitignored). `test.ts` loads that DB and runs four test layers: SQL filtering, semantic search, LLM decomposition, end-to-end pipeline. The DB file can also be copied to a device's `documentDir/` to verify map rendering.
+
+**Dependency note:** `better-sqlite3` must be **v12.x** (not v11) — v11 fails to compile on Node 24+ due to V8 API breakage (`v8::Global` constructor signature change). If you see `Could not locate the bindings file`, upgrade: `npm install better-sqlite3@12 --save-dev`.
+
+**Env vars used:** `SILICONFLOW_API_KEY`, `SILICONFLOW_EMBEDDING_MODEL`, `DEEPSEEK_API_KEY`, `DEEPSEEK_CHAT_MODEL`. Scripts load `.env` from the project root via a custom parser (no dotenv dependency).
+
+**Constraints:** these scripts do NOT modify any `src/` code. They import from `src/utils/vector-search.ts` directly (pure JS math). DB operations use `better-sqlite3` (sync API) instead of `expo-sqlite` (async), but SQL statements are identical.
