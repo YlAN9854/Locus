@@ -1,20 +1,19 @@
 /**
  * NL 查询分解服务。
  *
- * 调用 SiliconFlow Chat API,把用户的自然语言查询拆成 QueryDecomposition:
+ * 调用 DeepSeek 官方 Chat API,把用户的自然语言查询拆成 QueryDecomposition:
  *   - 时间 → 绝对 Unix 毫秒范围（SQL BETWEEN）
  *   - 地点 → 关键词列表（SQL LIKE）
  *   - 语义 → 查询文本（Embedding 相似度）
  *
- * 调用模式与 transcription.ts / embedding.ts 一致:
- *   expo-constants → fetch → JSON 解析 → 类型校验。
+ * 调用模式: expo-constants → fetch → JSON 解析 → 类型校验。
  *
  * 隐私: 仅发送查询文本 + system prompt（含当前日期）,零条用户记录。
  */
 import Constants from 'expo-constants';
 import type {QueryDecomposition} from '@/models/query-decomposition';
 
-const API_BASE = 'https://api.siliconflow.cn/v1';
+const API_BASE = 'https://api.deepseek.com';
 
 function buildSystemPrompt(): string {
   const now = new Date();
@@ -52,11 +51,11 @@ function buildSystemPrompt(): string {
 
 /** 将用户的自然语言查询分解为结构化过滤条件。 */
 export async function decomposeQuery(query: string): Promise<QueryDecomposition> {
-  const apiKey = Constants.expoConfig?.extra?.SILICONFLOW_API_KEY as string;
-  const model = (Constants.expoConfig?.extra?.SILICONFLOW_CHAT_MODEL as string) || 'deepseek-ai/DeepSeek-V4-Flash';
+  const apiKey = Constants.expoConfig?.extra?.DEEPSEEK_API_KEY as string;
+  const model = (Constants.expoConfig?.extra?.DEEPSEEK_CHAT_MODEL as string) || 'deepseek-v4-flash';
 
   if (!apiKey) {
-    throw new Error('未配置 SILICONFLOW_API_KEY');
+    throw new Error('未配置 DEEPSEEK_API_KEY');
   }
 
   const controller = new AbortController();

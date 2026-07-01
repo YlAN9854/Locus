@@ -8,74 +8,74 @@
 
 module.exports = {
   expo: {
-    name: 'locus',
-    slug: 'locus',
-    version: '1.0.0',
-    orientation: 'portrait',
-    icon: './assets/images/icon.png',
-    scheme: 'locus',
-    userInterfaceStyle: 'automatic',
+    name: "locus",
+    slug: "locus",
+    version: "1.0.0",
+    orientation: "portrait",
+    icon: "./assets/images/icon.png",
+    scheme: "locus",
+    userInterfaceStyle: "automatic",
     ios: {
-      icon: './assets/expo.icon',
-      bundleIdentifier: 'com.locus.app',
+      icon: "./assets/expo.icon",
+      bundleIdentifier: "com.locus.app",
       infoPlist: {
         NSLocationWhenInUseUsageDescription:
-          '经纬需要定位来记录「某时某地」的坐标与地点名',
-        NSCameraUsageDescription: '经纬需要相机来拍下此刻的画面',
-        NSPhotoLibraryUsageDescription: '经纬需要访问相册以选择照片',
-        NSMicrophoneUsageDescription: '经纬需要麦克风来记录此刻的声音',
+          "经纬需要定位来记录「某时某地」的坐标与地点名",
+        NSCameraUsageDescription: "经纬需要相机来拍下此刻的画面",
+        NSPhotoLibraryUsageDescription: "经纬需要访问相册以选择照片",
+        NSMicrophoneUsageDescription: "经纬需要麦克风来记录此刻的声音",
       },
     },
     android: {
-      package: 'com.locus',
+      package: "com.locus",
       adaptiveIcon: {
-        backgroundColor: '#E6F4FE',
-        foregroundImage: './assets/images/android-icon-foreground.png',
-        backgroundImage: './assets/images/android-icon-background.png',
-        monochromeImage: './assets/images/android-icon-monochrome.png',
+        backgroundColor: "#E6F4FE",
+        foregroundImage: "./assets/images/android-icon-foreground.png",
+        backgroundImage: "./assets/images/android-icon-background.png",
+        monochromeImage: "./assets/images/android-icon-monochrome.png",
       },
       predictiveBackGestureEnabled: false,
       permissions: [
-        'android.permission.ACCESS_FINE_LOCATION',
-        'android.permission.ACCESS_COARSE_LOCATION',
-        'android.permission.CAMERA',
-        'android.permission.ACCESS_NETWORK_STATE',
-        'android.permission.ACCESS_WIFI_STATE',
-        'android.permission.RECORD_AUDIO',
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.CAMERA",
+        "android.permission.ACCESS_NETWORK_STATE",
+        "android.permission.ACCESS_WIFI_STATE",
+        "android.permission.RECORD_AUDIO",
       ],
     },
     plugins: [
-      'expo-router',
+      "expo-router",
       [
-        'expo-splash-screen',
+        "expo-splash-screen",
         {
-          backgroundColor: '#208AEF',
+          backgroundColor: "#208AEF",
           android: {
-            image: './assets/images/splash-icon.png',
+            image: "./assets/images/splash-icon.png",
             imageWidth: 76,
           },
         },
       ],
-      'expo-sqlite',
-      'expo-sharing',
+      "expo-sqlite",
+      "expo-sharing",
       [
-        'expo-gaode-map',
+        "expo-gaode-map",
         {
           androidKey: process.env.AMAP_ANDROID_KEY,
           iosKey: process.env.AMAP_IOS_KEY,
         },
       ],
       [
-        'expo-image-picker',
+        "expo-image-picker",
         {
-          cameraPermission: '经纬需要相机来拍下此刻的画面',
-          photosPermission: '经纬需要访问相册以选择照片',
+          cameraPermission: "经纬需要相机来拍下此刻的画面",
+          photosPermission: "经纬需要访问相册以选择照片",
         },
       ],
       [
-        'expo-audio',
+        "expo-audio",
         {
-          microphonePermission: '经纬需要麦克风来记录此刻的声音',
+          microphonePermission: "经纬需要麦克风来记录此刻的声音",
         },
       ],
     ],
@@ -85,12 +85,16 @@ module.exports = {
     },
     extra: {
       router: {},
-      SILICONFLOW_API_KEY: process.env.SILICONFLOW_API_KEY ?? '',
-      SILICONFLOW_MODEL: process.env.SILICONFLOW_MODEL ?? 'TeleAI/TeleSpeechASR',
-      SILICONFLOW_CHAT_MODEL: process.env.SILICONFLOW_CHAT_MODEL ?? 'deepseek-ai/DeepSeek-V4-Flash',
-      SILICONFLOW_EMBEDDING_MODEL: process.env.SILICONFLOW_EMBEDDING_MODEL ?? 'BAAI/bge-large-zh-v1.5',
+      SILICONFLOW_API_KEY: process.env.SILICONFLOW_API_KEY ?? "",
+      SILICONFLOW_VOICE_MODEL:
+        process.env.SILICONFLOW_VOICE_MODEL ?? "TeleAI/TeleSpeechASR",
+      SILICONFLOW_EMBEDDING_MODEL:
+        process.env.SILICONFLOW_EMBEDDING_MODEL ?? "BAAI/bge-large-zh-v1.5",
+      DEEPSEEK_API_KEY: process.env.DEEPSEEK_API_KEY ?? "",
+      DEEPSEEK_CHAT_MODEL:
+        process.env.DEEPSEEK_CHAT_MODEL ?? "deepseek-v4-flash",
       eas: {
-        projectId: 'fdba50ea-28bd-4c44-bcee-739694dc760f',
+        projectId: "fdba50ea-28bd-4c44-bcee-739694dc760f",
       },
     },
   },

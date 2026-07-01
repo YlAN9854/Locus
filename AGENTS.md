@@ -14,16 +14,17 @@ Read the exact versioned docs at https://docs.expo.dev/versions/v56.0.0/ before 
 
 ## Commands
 
-| Command | Notes |
-|---|---|
-| `pnpm start` | Dev server |
-| `pnpm lint` | ESLint (`expo lint`) |
-| `pnpm expo run:android` / `pnpm expo run:ios` | Build + run dev client |
-| `eas build --profile development` | Cloud dev build |
-| `eas build --profile preview` | Internal preview build |
-| `eas build --profile production` | Production build (auto-increment version) |
+| Command                                       | Notes                                     |
+| --------------------------------------------- | ----------------------------------------- |
+| `pnpm start`                                  | Dev server                                |
+| `pnpm lint`                                   | ESLint (`expo lint`)                      |
+| `pnpm expo run:android` / `pnpm expo run:ios` | Build + run dev client                    |
+| `eas build --profile development`             | Cloud dev build                           |
+| `eas build --profile preview`                 | Internal preview build                    |
+| `eas build --profile production`              | Production build (auto-increment version) |
 
 **Verification before committing:**
+
 1. `npx tsc --noEmit` — type check (requires `typescript` in devDeps, or use `npx -y -p typescript tsc --noEmit`)
 2. `pnpm lint` — ESLint
 3. `pnpm expo run:android` / `pnpm expo run:ios` — runtime smoke test
@@ -52,6 +53,7 @@ src/
 ## Initialization order (critical)
 
 In `src/app/_layout.tsx`, the root layout runs two async steps **before rendering any UI**:
+
 1. `ensureAmapPrivacy()` — privacy compliance call **must** happen before any map/location API usage.
 2. `initDatabase()` — opens SQLite DB and creates the `records` table.
 
@@ -63,7 +65,7 @@ While initializing, the app shows a spinner. On error, it shows an error screen.
 - **MVP: insert, query, delete, with one exception** — `updateNote(id, text)` exists for AI transcription back-fill. No other update operations.
 - Photos stored as flat files under `documentDir/photos/` with relative paths in the DB, not as blobs.
 - Audio recordings stored under `documentDir/audio/` (same pattern as photos). `expo-audio` handles recording/playback.
-- **AI transcription** via SiliconFlow API (`services/transcription.ts`). Requires `SILICONFLOW_API_KEY` and `SILICONFLOW_MODEL` in `.env`. These are injected into `app.config.js` `extra`, read at runtime via `expo-constants` — NOT `process.env`. Default model: `TeleAI/TeleSpeechASR`.
+- **AI transcription** via SiliconFlow API (`services/transcription.ts`). Requires `SILICONFLOW_API_KEY` and `SILICONFLOW_VOICE_MODEL` in `.env`. These are injected into `app.config.js` `extra`, read at runtime via `expo-constants` — NOT `process.env`. Default model: `TeleAI/TeleSpeechASR`.
 
 ## Platform targets
 

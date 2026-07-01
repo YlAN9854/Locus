@@ -4,7 +4,7 @@
 >
 > Locus 帮你把世界线上的点一个一个标记下来——当忆往昔时，可以沿着这条线走回去。
 >
-> *每一条记录都是世界线上的一个点，点终将连成线。*
+> _每一条记录都是世界线上的一个点，点终将连成线。_
 
 ---
 
@@ -16,11 +16,11 @@
 
 **MVP 核心闭环：**
 
-| 模块 | 能力 |
-|------|------|
-| 记录 | 拍照 + 一句话文字 + 自动定位带出地点名 |
+| 模块 | 能力                                         |
+| ---- | -------------------------------------------- |
+| 记录 | 拍照 + 一句话文字 + 自动定位带出地点名       |
 | 回看 | 地图视图：记录过的地点散落其上，点开即见图文 |
-| 导出 | 一键导出（照片原图 + 带时间地点的可读文件） |
+| 导出 | 一键导出（照片原图 + 带时间地点的可读文件）  |
 
 **关键决策：纯本地存储，无账号，无云同步。** 数据完全属于你，可随时一键带走。正因为"随时能拿走"，你才敢把一生的记忆托付进来。
 
@@ -28,17 +28,17 @@
 
 ## 技术栈
 
-| 用途 | 选型 |
-|------|------|
-| 框架 | [Expo SDK 56](https://docs.expo.dev/versions/v56.0.0/) + React Native 0.85 |
-| 语言 | TypeScript 6 |
-| 路由 | expo-router（文件路由 + typedRoutes） |
-| 地图 | 高德地图（expo-gaode-map），GCJ-02 坐标系 |
-| 本地存储 | expo-sqlite（SQLite，元数据）+ expo-file-system（照片/音频文件） |
-| 录音 | expo-audio（hooks API） |
-| 拍照 | expo-image-picker |
-| AI 转录 | SiliconFlow API（语音转文字） |
-| 导出 | expo-sharing + fflate（zip 打包） |
+| 用途     | 选型                                                                       |
+| -------- | -------------------------------------------------------------------------- |
+| 框架     | [Expo SDK 56](https://docs.expo.dev/versions/v56.0.0/) + React Native 0.85 |
+| 语言     | TypeScript 6                                                               |
+| 路由     | expo-router（文件路由 + typedRoutes）                                      |
+| 地图     | 高德地图（expo-gaode-map），GCJ-02 坐标系                                  |
+| 本地存储 | expo-sqlite（SQLite，元数据）+ expo-file-system（照片/音频文件）           |
+| 录音     | expo-audio（hooks API）                                                    |
+| 拍照     | expo-image-picker                                                          |
+| AI 转录  | SiliconFlow API（语音转文字）                                              |
+| 导出     | expo-sharing + fflate（zip 打包）                                          |
 
 目标平台：**Android + iOS**，无 Web 支持。
 
@@ -76,7 +76,7 @@ AMAP_IOS_KEY=your_ios_key
 # 硅基流动 API Key（https://cloud.siliconflow.cn 获取，用于录音转文字）
 SILICONFLOW_API_KEY=your_api_key
 # 语音转文字模型（默认即可）
-SILICONFLOW_MODEL=TeleAI/TeleSpeechASR
+SILICONFLOW_VOICE_MODEL=TeleAI/TeleSpeechASR
 ```
 
 > **注意**：`.env` 已加入 `.gitignore`，不会进仓库。高德 Key 在 EAS 云构建时需在 EAS 项目 Environment Variables 中配置同名变量。
@@ -162,6 +162,7 @@ app → screens → components / services / db / hooks → models / utils / cons
 ```
 
 关键规则：
+
 - 所有导入使用 `@/` 别名（映射到 `src/`），禁止相对路径
 - 文件命名使用 `kebab-case`（如 `record-screen.tsx`），组件名保持 `PascalCase`
 - `services/` 和 `db/` 不得引用 UI 层（`components/` / `screens/`）
